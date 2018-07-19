@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        ul {
+            list-style: none;
+            width: 500px;
+            margin: 0 auto;
+        }
+
+        li {
+            font-size: 22px;
+            font-weight: 700;
+            color: hotpink;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        .app {
+            text-align: center;
+        }
+
+        ul>li {
+            text-align: left;
+        }
+
+        li span.done {
+            text-decoration: line-through;
+            color: gray;
+        }
+
+        li a {
+            text-decoration: none;
+            color: #000;
+            float: right;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>带办事列表</h2>
+    <div class="app">
+        <!--  v-model=""  监控表单中的数据-变化 -->
+        <input type="text" v-model="todo" placeholder="请输入">
+        <!-- v-on="" 注册事件 @为简写 -->
+        <input type="button" @click='add' value="添加">
+        <h3>总数:{{list.length}}--已完成:{{doneNum}}</h3>
+        <ul>
+            <li v-for="(item, index) in list" :key="index">
+                <!-- v-bind:class -->
+                <span @click="doThis(index)" v-bind:class="{ done: item.isDone }">{{index+1}}.{{item.name}}</span>
+                <a href="javascript: ;" @click.stop="remover(index)">删除</a>
+            </li>
+        </ul>
+    </div>
+</body>
+
+</html>
+<script src="./lib/vue.js"></script>
+<script>
+    //获取保存的本地数据
+    let list = window.localStorage.getItem('list');
+
+    if (list) {
+        list = JSON.parse(list);
+    } else {
+        list = [{
+                name: '买菜',
+                isDone: false
+            },
+            {
+                name: '洗菜',
+                isDone: false
+            },
+            {
+                name: '切菜',
+                isDone: false
+            },
+            {
+                name: '烧菜',
+                isDone: false
+            }
+        ]
+    }
+    //保存数据到本地
+    function saveData() {
+        window.localStorage.setItem('list', JSON.stringify(list));
+
+    }
+    let app = new Vue({
+        //选择器
+        el: ".app",
+        //简单数据
+        data: {
+            list,
+            todo: ''
+
+        },
+        //方法
+        methods: {
+            //添加带办事
+            add() {
+                this.list.push({
+                    name: this.todo,
+                    isDone: false
+                });
+                saveData();
+            },
+            //完成带办事
+            doThis(index) {
+                this.list[index].isDone = !this.list[index].isDone;
+                console.log(this.list[index].isDone);
+            },
+            //删除带办事
+            remover(index) {
+                this.list.splice(index, 1);
+            }
+        },
+        //作用是 如果某一个数据的值 需要经历复杂的计算 才能算出来 
+        //可以写在computed中 以返回值的方式 返回  方法名要和挖坑的名字一样
+        // vue 解析的时候 直接调用这个函数 把返回值 放在那个位置
+        computed: {
+            doneNum() {
+                let num = 0;
+                for (let i = 0; i < this.list.length; i++) {
+                    if (this.list[i].isDone) {
+                        num++;
+                    }
+                }
+                return num;
+            }
+        },
+
+    })
+</script>
